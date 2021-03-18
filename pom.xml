@@ -8,15 +8,19 @@
 		<version>2.4.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>test</groupId>
-	<artifactId>test</artifactId>
+	<groupId>Iavo-Faniry</groupId>
+	<artifactId>Mobile-Money</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>test</name>
-	<description>Test project for Spring Boot</description>
+	<name>Mobile-Money</name>
+	<description>Projet final S5</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
