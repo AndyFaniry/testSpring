@@ -29,7 +29,7 @@ public class OperateurControlleur {
 	@GetMapping(value="/admin/retrait")
 	public Response listeRetrait(@RequestHeader("Authorization") String bearertoken) throws Exception {
 		String token= Token.deleteBearerToToken(bearertoken);
-		return Operateur.getDepotNonValide(token);
+		return Operateur.getRetraitNonValide(token);
 	}
 	@PostMapping(value="/admin/valider")
 	public Response validerMouvement(@RequestBody int idMouv) throws Exception {
