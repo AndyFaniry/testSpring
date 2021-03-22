@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import com.mobilemoney.bdb.ConnectionPstg;
+import com.mobilemoney.fonction.Fonction;
 
 public class Operateur {
 	 int idOperateur;
