@@ -116,7 +116,7 @@ public class Operateur {
 	}
 	public static ArrayList<MouvementMoney> getMouvDepotNonValide(String token,Connection co) throws Exception {
 		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
-		int idOperateur= Token.verificationTokenAdmin(token,co);
+		String idOperateur= Token.verificationTokenAdmin(token,co);
 		String sql="select * from v_depot_non_valide where idOperateur="+idOperateur;
 		System.out.println("sql andramana="+sql);
 		val= MouvementMoney.findMouvementMoney(sql,co);
@@ -143,7 +143,7 @@ public class Operateur {
 	}
 	public static ArrayList<MouvementMoney> getMouvRetraitNonValide(String token,Connection co) throws Exception {
 		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
-		int idOperateur= Token.verificationTokenAdmin(token,co);
+		String idOperateur= Token.verificationTokenAdmin(token,co);
 		String sql="select * from v_retrait_non_valide where idOperateur="+idOperateur;
 		System.out.println("sql andramana="+sql);
 		val= MouvementMoney.findMouvementMoney(sql,co);
@@ -172,12 +172,12 @@ public class Operateur {
 	public static Response validerMouvement(String token, String idMouv) throws Exception{
 		Connection co= new ConnectionPstg().getConnection();
 		Response reponse= new Response();
-		int idMouvementMoney= new Integer(idMouv).intValue();
-		int idAdmin= Token.verificationTokenAdmin(token, co);
+		int idMouvementMoney= Integer.parseInt(idMouv);
+		String idAdmin= Token.verificationTokenAdmin(token, co);
 		ArrayList<MouvementMoney> mouvs= new ArrayList<MouvementMoney>();
 		
 		try {
-			if(idAdmin!=0) {
+			if(idAdmin!=null) {
 				MouvementMoney.upDateMouvementMoney(idMouvementMoney,co);
 				mouvs= MouvementMoney.findMouvementMoneyById(idMouvementMoney,co);
 				reponse.data= mouvs;
@@ -201,5 +201,142 @@ public class Operateur {
 		return reponse;
 		
 	}
-	
+	public static ArrayList<MouvementMoney> getDepotEffectuer(String token,String daty1, String daty2,Connection co) throws Exception {
+		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
+		String idOperateur= Token.verificationTokenAdmin(token,co);
+		String sql="select * from v_depot_valide where idOperateur="+idOperateur+" and daty>'"+daty1+"' and daty<'"+daty2+"'";
+		System.out.println("sql andramana="+sql);
+		val= MouvementMoney.findMouvementMoney(sql,co);
+		return val;
+	}
+	public static ArrayList<MouvementMoney> getRetraitEffectuer(String token,String daty1, String daty2,Connection co) throws Exception {
+		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
+		String idOperateur= Token.verificationTokenAdmin(token,co);
+		String sql="select * from v_retrait_valide where idOperateur="+idOperateur+" and date(daty)>='"+daty1+"' and date(daty)<='"+daty2+"'";
+		System.out.println("sql andramana="+sql);
+		val= MouvementMoney.findMouvementMoney(sql,co);
+		return val;
+	}
+	public static Response statDepot(String token,String type, String daty1, String daty2) throws Exception{
+		Connection co= new ConnectionPstg().getConnection();
+		Response reponse= new Response();
+		try {
+			ArrayList<MouvementMoney> mouvs=  new ArrayList<MouvementMoney>();
+			if(type.compareTo("depot")==0) mouvs= Operateur.getDepotEffectuer(token,daty1,daty2,co);
+			else mouvs= Operateur.getRetraitEffectuer(token,daty1,daty2,co);
+			reponse.data= mouvs;
+			reponse.message= "mouvement valider";
+			reponse.code="200";
+		}
+		catch(Exception ex) {
+			reponse.code="400";
+			reponse.message= ex.getMessage();
+		}
+		finally {
+			if(co != null) co.close();
+		}
+		return reponse;
+		
+	}
+	public static Operateur findOperateurById(String ido,Connection co){
+		PreparedStatement preparedStatement = null;
+		ResultSet resultSet = null;
+		Operateur operateur=null;
+		try {
+			String sql="select * from operateur where  idoperateur="+ido;
+			preparedStatement = co.prepareStatement(sql);
+			resultSet = preparedStatement.executeQuery();
+			while (resultSet.next()) {
+				int idOperateur=resultSet.getInt("idOperateur");
+				String nom=resultSet.getString("nom");
+				String prefixe=resultSet.getString("prefixe");
+				String mdp=resultSet.getString("mdp");
+				operateur= new Operateur(idOperateur,nom,prefixe,mdp);
+			}
+		}catch(Exception e) {
+			e.getMessage();
+		}
+		return operateur;
+    }
+	public static Response getOperateur(String token) throws Exception{
+		Connection co= new ConnectionPstg().getConnection();
+		Response reponse= new Response();
+		String id=Token.verificationTokenAdmin(token, co);
+		Operateur val=Operateur.findOperateurById(id, co);
+		try {
+			reponse.data= val;
+			reponse.message= null;
+			reponse.code="200";
+		}
+		catch(Exception ex) {
+			reponse.code="400";
+			reponse.message= ex.getMessage();
+		}
+		finally {
+			if(co != null) co.close();
+		}
+		return reponse;	
+	}
+	public static Response checkMdp(String token,String mdp) throws Exception {
+		Connection co= new ConnectionPstg().getConnection();
+		Response reponse= new Response();
+		try {
+			String ido=Token.verificationTokenAdmin(token, co);
+			Operateur opValide= Operateur.findOperateurById(ido, co);
+			String mdpsha1=Fonction.addSha1(mdp, co);
+			if(opValide.getMdp().compareTo(mdpsha1)==0) {
+				reponse.data= opValide;
+				reponse.message= "Mots de passe compatible";
+				reponse.code="200";
+			}else {
+				throw new Exception("Mots de passe incorrect");
+			}
+		}
+		catch(Exception ex) {
+			reponse.code="400";
+			reponse.message= ex.getMessage();
+		}
+		finally {
+			if(co != null) co.close();
+		}
+		return reponse;
+	}
+	public static void updateOperateur(int idOperateur,String nom,String Prefix,String mdp,Connection co) throws Exception{
+		PreparedStatement st = null;
+		try {
+			String sql= "update operateur set nom=?,prefix=?,mdp=?  where idOperateur=?";
+			st = co.prepareStatement(sql);
+			st.setString(1,nom);
+			st.setString(2, Prefix);
+			st.setString(3, mdp);
+			st.setInt(4, idOperateur);
+			st.execute();
+				co.commit();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(st != null) st.close();
+		}
+	}
+	public static Response update(String token,String nom,String Prefix,String mdp) throws Exception {
+		Connection co= new ConnectionPstg().getConnection();
+		Response reponse= new Response();
+		try {
+			String ido=Token.verificationTokenAdmin(token, co);
+			Operateur opValide= Operateur.findOperateurById(ido, co);
+			String mdpsha1=Fonction.addSha1(mdp, co);
+			Operateur.updateOperateur(Integer.parseInt(ido), nom, Prefix, mdpsha1, co);
+				reponse.data= opValide;
+				reponse.message= "Operateur update";
+				reponse.code="200";
+		}
+		catch(Exception ex) {
+			reponse.code="400";
+			reponse.message= ex.getMessage();
+		}
+		finally {
+			if(co != null) co.close();
+		}
+		return reponse;
+	}
 }

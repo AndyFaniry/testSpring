@@ -88,10 +88,26 @@ public class Client {
 		curs.close();
 		return c;
 	}
+	public static Client findClient(String nom,String email) throws Exception{
+		MongoDatabase db=new ConnectionMongo().connect();
+		MongoCollection<Document> coll=db.getCollection("client");
+		Client c=null;
+		MongoCursor<Document> curs=coll.find(new Document("nom", nom).append("email", email)).iterator();
+		while(curs.hasNext())
+	    {
+			Document d=curs.next();
+			String id= d.getInteger("_id").toString();
+			String n= d.getString("nom");
+			String em= d.getString("email");
+	         c=new Client(id,n,em);
+	    }
+		curs.close();
+		return c;
+	}
 	public static int countClient()throws Exception{
 		return Client.getListeClient().size()+1;
 	}
-	public String InsertClient(String nom,String email)throws Exception{
+	public static String InsertClient(String nom,String email)throws Exception{
 		String val="";
 		try {
 			MongoDatabase db=new ConnectionMongo().connect();

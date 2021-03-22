@@ -30,11 +30,18 @@ public class ClientController {
 		reponse.code= "200" ;
 		return reponse;
 	}
-	
+	@GetMapping("/client/getclient")
+	public Response getClient(@RequestBody Map<String,String> client) throws Exception{
+		Response reponse= new Response();
+		reponse.data=Client.findClientById(Integer.parseInt(client.get("idclient")));
+		reponse.message= null;
+		reponse.code= "200" ;
+		return reponse;
+	}
 	@PostMapping(value="/client/create")
 	public Response createClient(@RequestBody Map<String,String> nom,@RequestBody Map<String,String> email) throws Exception {
 		Response reponse= new Response();
-		String insert=new Client().InsertClient(nom.get("nom"), email.get("email"));
+		String insert=Client.InsertClient(nom.get("nom"), email.get("email"));
 		reponse.data= null;
 		reponse.message= insert;
 		reponse.code= "200" ;
