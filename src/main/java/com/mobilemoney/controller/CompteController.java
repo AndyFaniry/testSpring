@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mobilemoney.model.Client;
 import com.mobilemoney.model.Compte;
+import com.mobilemoney.model.Credit;
 import com.mobilemoney.model.MouvementMoney;
 import com.mobilemoney.model.Response;
 import com.mobilemoney.model.Token;
+import com.mobilemoney.model.offre.AchatOffre;
 
 @CrossOrigin(origins="*",allowedHeaders="*")
 @RestController
@@ -37,5 +39,18 @@ public class CompteController {
 		String valeur1= valeur.get("valeur");
 		Response r= Compte.depotMoney(token,valeur1);
 		return r;
+	}
+	@PostMapping(value="/compte/achat/offre")
+	public Response achatOffre(@RequestHeader("Authorization") String bearertoken,@RequestBody Map<String,String> donner) throws Exception {
+		String token= Token.deleteBearerToToken(bearertoken);
+		String idOffre= donner.get("idOffre");
+		String daty= donner.get("daty");
+		Response r= AchatOffre.achatOffre(token, idOffre, daty);
+		return r;
+	}
+	@GetMapping(value="/compte/solde/credit")
+	public Response soldeCredit(@RequestHeader("Authorization") String bearertoken) throws Exception{
+		String token= Token.deleteBearerToToken(bearertoken);
+		return Credit.getSoldeWebService(token);
 	}
 }

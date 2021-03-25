@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import com.mobilemoney.bdb.ConnectionPstg;
 import com.mobilemoney.fonction.Fonction;
+import com.mobilemoney.model.mouvement.MouvementMobileMoney;
 
 public class Operateur {
 	 int idOperateur;
@@ -99,7 +100,7 @@ public class Operateur {
 	public static Response getDepotNonValide(String token) throws Exception{
 		Connection co= new ConnectionPstg().getConnection();
 		Response reponse= new Response();
-		ArrayList<MouvementMoney> val=Operateur.getMouvDepotNonValide(token,co);
+		ArrayList<MouvementMobileMoney> val=Operateur.getMouvDepotNonValide(token,co);
 		try {
 			reponse.data= val;
 			reponse.message= null;
@@ -115,18 +116,18 @@ public class Operateur {
 		return reponse;
 		
 	}
-	public static ArrayList<MouvementMoney> getMouvDepotNonValide(String token,Connection co) throws Exception {
-		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
+	public static ArrayList<MouvementMobileMoney> getMouvDepotNonValide(String token,Connection co) throws Exception {
+		ArrayList<MouvementMobileMoney> val= new ArrayList<MouvementMobileMoney>();
 		String idOperateur= Token.verificationTokenAdmin(token,co);
 		String sql="select * from v_depot_non_valide where idOperateur="+idOperateur;
 		System.out.println("sql andramana="+sql);
-		val= MouvementMoney.findMouvementMoney(sql,co);
+		val= MouvementMobileMoney.findMouvementMobileMoney(sql,co);
 		return val;
 	}
 	public static Response getRetraitNonValide(String token) throws Exception{
 		Connection co= new ConnectionPstg().getConnection();
 		Response reponse= new Response();
-		ArrayList<MouvementMoney> val=Operateur.getMouvRetraitNonValide(token,co);
+		ArrayList<MouvementMobileMoney> val=Operateur.getMouvRetraitNonValide(token,co);
 		try {
 			reponse.data= val;
 			reponse.message= null;
@@ -142,19 +143,19 @@ public class Operateur {
 		return reponse;
 		
 	}
-	public static ArrayList<MouvementMoney> getMouvRetraitNonValide(String token,Connection co) throws Exception {
-		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
+	public static ArrayList<MouvementMobileMoney> getMouvRetraitNonValide(String token,Connection co) throws Exception {
+		ArrayList<MouvementMobileMoney> val= new ArrayList<MouvementMobileMoney>();
 		String idOperateur= Token.verificationTokenAdmin(token,co);
 		String sql="select * from v_retrait_non_valide where idOperateur="+idOperateur;
 		System.out.println("sql andramana="+sql);
-		val= MouvementMoney.findMouvementMoney(sql,co);
+		val= MouvementMobileMoney.findMouvementMobileMoney(sql,co);
 		return val;
 	}
 	public static Response validerMouvement(int idMouvementMoney) throws Exception{
 		Connection co= new ConnectionPstg().getConnection();
 		Response reponse= new Response();
-		MouvementMoney.upDateMouvementMoney(idMouvementMoney,co);
-		ArrayList<MouvementMoney> mouvs= MouvementMoney.findMouvementMoneyById(idMouvementMoney,co);
+		MouvementMobileMoney.upDateMouvementMobileMoney(idMouvementMoney,co);
+		ArrayList<MouvementMobileMoney> mouvs= MouvementMobileMoney.findMouvementMobileMoneyById(idMouvementMoney,co);
 		try {
 			reponse.data= mouvs;
 			reponse.message= "mouvement valider";
@@ -175,12 +176,11 @@ public class Operateur {
 		Response reponse= new Response();
 		int idMouvementMoney= Integer.parseInt(idMouv);
 		String idAdmin= Token.verificationTokenAdmin(token, co);
-		ArrayList<MouvementMoney> mouvs= new ArrayList<MouvementMoney>();
-		
+		ArrayList<MouvementMobileMoney> mouvs= new ArrayList<MouvementMobileMoney>();
 		try {
 			if(idAdmin!=null) {
-				MouvementMoney.upDateMouvementMoney(idMouvementMoney,co);
-				mouvs= MouvementMoney.findMouvementMoneyById(idMouvementMoney,co);
+				MouvementMobileMoney.upDateMouvementMobileMoney(idMouvementMoney,co);
+				mouvs= MouvementMobileMoney.findMouvementMobileMoneyById(idMouvementMoney,co);
 				reponse.data= mouvs;
 				reponse.message= "mouvement valider";
 				reponse.code="200";
@@ -202,31 +202,29 @@ public class Operateur {
 		return reponse;
 		
 	}
-	public static ArrayList<MouvementMoney> getDepotEffectuer(String token,String daty1, String daty2,Connection co) throws Exception {
-		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
+	public static ArrayList<MouvementMobileMoney> getDepotEffectuer(String token,String daty1, String daty2,Connection co) throws Exception {
+		ArrayList<MouvementMobileMoney> val= new ArrayList<MouvementMobileMoney>();
 		String idOperateur= Token.verificationTokenAdmin(token,co);
 		String sql="select * from v_depot_valide where idOperateur="+idOperateur+" and daty>'"+daty1+"' and daty<'"+daty2+"'";
-		System.out.println("sql andramana="+sql);
-		val= MouvementMoney.findMouvementMoney(sql,co);
+		val= MouvementMobileMoney.findMouvementMobileMoney(sql,co);
 		return val;
 	}
-	public static ArrayList<MouvementMoney> getRetraitEffectuer(String token,String daty1, String daty2,Connection co) throws Exception {
-		ArrayList<MouvementMoney> val= new ArrayList<MouvementMoney>();
+	public static ArrayList<MouvementMobileMoney> getRetraitEffectuer(String token,String daty1, String daty2,Connection co) throws Exception {
+		ArrayList<MouvementMobileMoney> val= new ArrayList<MouvementMobileMoney>();
 		String idOperateur= Token.verificationTokenAdmin(token,co);
 		String sql="select * from v_retrait_valide where idOperateur="+idOperateur+" and date(daty)>='"+daty1+"' and date(daty)<='"+daty2+"'";
-		System.out.println("sql andramana="+sql);
-		val= MouvementMoney.findMouvementMoney(sql,co);
+		val= MouvementMobileMoney.findMouvementMobileMoney(sql,co);
 		return val;
 	}
 	public static Response statDepot(String token,String type, String daty1, String daty2) throws Exception{
 		Connection co= new ConnectionPstg().getConnection();
 		Response reponse= new Response();
 		try {
-			ArrayList<MouvementMoney> mouvs=  new ArrayList<MouvementMoney>();
+			ArrayList<MouvementMobileMoney> mouvs=  new ArrayList<MouvementMobileMoney>();
 			if(type.compareTo("depot")==0) mouvs= Operateur.getDepotEffectuer(token,daty1,daty2,co);
 			else mouvs= Operateur.getRetraitEffectuer(token,daty1,daty2,co);
 			reponse.data= mouvs;
-			reponse.message= "mouvement valider";
+			reponse.message= "Tous les Depots effectués";
 			reponse.code="200";
 		}
 		catch(Exception ex) {
@@ -284,7 +282,10 @@ public class Operateur {
 		try {
 			String ido=Token.verificationTokenAdmin(token, co);
 			Operateur opValide= Operateur.findOperateurById(ido, co);
-			String mdpsha1=Fonction.addSha1(mdp, co);
+			System.out.println(opValide.getMdp());
+			String mdpp="@admin123"+mdp;
+			String mdpsha1=Fonction.addSha1(mdpp, co);
+			System.out.println(mdpsha1);
 			if(opValide.getMdp().compareTo(mdpsha1)==0) {
 				reponse.data= opValide;
 				reponse.message= "Mots de passe compatible";
@@ -328,6 +329,31 @@ public class Operateur {
 			String mdpsha1=Fonction.addSha1(mdp, co);
 			Operateur.updateOperateur(Integer.parseInt(ido), nom, Prefix, mdpsha1, co);
 				reponse.data= opValide;
+				reponse.message= "Operateur update";
+				reponse.code="200";
+		}
+		catch(Exception ex) {
+			reponse.code="400";
+			reponse.message= ex.getMessage();
+		}
+		finally {
+			if(co != null) co.close();
+		}
+		return reponse;
+	}
+	public static ArrayList<MouvementMobileMoney> soldeClient(String token,Connection co) throws Exception {
+		ArrayList<MouvementMobileMoney> val= new ArrayList<MouvementMobileMoney>();
+		String idOperateur= Token.verificationTokenAdmin(token,co);
+		String sql="select idCompte,idOperateur,num,sum(valeur) as valeur, max(daty) as daty from v_MobileMoney where idOperateur="+idOperateur+" and statu=1 group by idCompte,idOperateur,num order by valeur";
+		val= MouvementMobileMoney.findMouvementMobileMoney(sql,co);
+		return val;
+	}
+	public static Response getSoldeClient(String token) throws Exception {
+		Connection co= new ConnectionPstg().getConnection();	
+		Response reponse= new Response();
+		try {
+			ArrayList<MouvementMobileMoney> solde=  Operateur.soldeClient(token,co);
+				reponse.data= solde;
 				reponse.message= "Operateur update";
 				reponse.code="200";
 		}

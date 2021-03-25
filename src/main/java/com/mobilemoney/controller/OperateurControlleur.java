@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,26 +81,26 @@ public class OperateurControlleur {
 		String token= Token.deleteBearerToToken(bearertoken);
 		return Offre.getListeOffre(token);
 	}
-	@GetMapping(value="/admin/offre/details")
-	public Response getDetailsOffre(@RequestHeader("Authorization") String bearertoken,@RequestBody Map<String,String> donner) throws Exception {
+	@GetMapping(value="/admin/offre/details/{id}")
+	public Response getDetailsOffre(@RequestHeader("Authorization") String bearertoken,@PathVariable String id) throws Exception {
 		String token= Token.deleteBearerToToken(bearertoken);
-		String idOffre= donner.get("idOffre");
-		return Offre.getDetailsOffre(idOffre);
+		return Offre.getDetailsOffre(id);
 	}
-	@DeleteMapping(value="/admin/offre/appel")
-	public Response deleteDetailOffreAppel(@RequestBody Map<String,String> donner) throws Exception {
-		String idOffre= donner.get("idOffre");
-		return DetailsOffreAppel.deleteOffreAppel(idOffre);
+	@DeleteMapping(value="/admin/offre/appel/{id}")
+	public Response deleteDetailOffreAppel(@PathVariable String id) throws Exception {
+		return DetailsOffreAppel.deleteOffreAppel(id);
 	}
-	@DeleteMapping(value="/admin/offre/internet")
-	public Response deleteDetailOffreInternet(@RequestBody Map<String,String> donner) throws Exception {
-		String idOffre= donner.get("idOffre");
-		return DetailsOffreInternet.deleteOffreInternet(idOffre);
+	@DeleteMapping(value="/admin/offre/internet/{id}")
+	public Response deleteDetailOffreInternet(@PathVariable String id) throws Exception {
+		return DetailsOffreInternet.deleteOffreInternet(id);
 	}
-	@DeleteMapping(value="/admin/offre")
-	public Response deleteDetailOffreSms(@RequestBody Map<String,String> donner) throws Exception {
-		String idOffre= donner.get("idOffre");
-		return Offre.deleteOffre(idOffre);
+	@DeleteMapping(value="/admin/offre/sms/{id}")
+	public Response deleteDetailOffreSms(@PathVariable String id) throws Exception {
+		return DetailsOffreSms.deleteOffreSms(id);
+	}
+	@DeleteMapping(value="/admin/offre/{id}")
+	public Response deleteDetailOffre(@PathVariable String id) throws Exception {
+		return Offre.deleteOffre(id);
 	}
 	@PutMapping(value="/admin/offre")
 	public Response updateDetailOffre(@RequestBody Map<String,String> donner) throws Exception {
@@ -154,6 +155,19 @@ public class OperateurControlleur {
 		String token= Token.deleteBearerToToken(bearertoken);
 		String md=mdp.get("mdp");
 		return Operateur.checkMdp(token, md);
+	}
+	@PutMapping(value="/admin/update")
+	public Response update(@RequestHeader("Authorization") String bearertoken,@RequestBody Map<String,String> donner) throws Exception {
+		String token= Token.deleteBearerToToken(bearertoken);
+		String nom=donner.get("nom");
+		String prefix=donner.get("prefix");
+		String mdp=donner.get("mdp");
+		return Operateur.update(token,nom,prefix,mdp);
+	}
+	@GetMapping(value="/admin/soldeClient")
+	public Response soldeClient(@RequestHeader("Authorization") String bearertoken) throws Exception {
+		String token= Token.deleteBearerToToken(bearertoken);
+		return Operateur.getSoldeClient(token);
 	}
 }
 

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.mobilemoney.bdb.ConnectionPstg;
 import com.mobilemoney.fonction.Fonction;
+import com.mobilemoney.model.mouvement.MouvementMobileMoney;
 
 public class Compte {
 	int idCompte;
@@ -180,8 +181,8 @@ public class Compte {
 		Response reponse= new Response();
 		try {
 			int idCompte= Token.verificationToken(token,co);
-			MouvementMoney.insertMouvement(idCompte,valeur,co);
-			ArrayList<MouvementMoney> mouv= MouvementMoney.getLastMouvBYCompte(idCompte,co);
+			MouvementMobileMoney.insertMouvement(idCompte,valeur,co);
+			ArrayList<MouvementMobileMoney> mouv= MouvementMobileMoney.getLastMouvBYCompte(idCompte,co);
 			reponse.data= mouv;
 			reponse.message= "depot effectuer veuillez attendre la validation";
 			reponse.code="200";

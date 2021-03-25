@@ -54,21 +54,7 @@ public class Credit {
 		this.daty = daty;
 	}
 	public Credit()throws Exception  {}
-	public Credit(int idCredit, int idCompte, String code, int valeur, String daty) throws Exception {
-		super();
-		setIdCredit(idCredit);
-		setIdCompte(idCompte);
-		setCode(code);
-		setValeur(valeur);
-		setDaty(daty);
-	}
-	public Credit(int idCompte, String code, int valeur, String daty) throws Exception{
-		super();
-		setIdCompte(idCompte);
-		setCode(code);
-		setValeur(valeur);
-		setDaty(daty);
-	}
+
 	public Credit(int idCredit,int idCompte, String code, int valeur, LocalDateTime daty) throws Exception{
 		super();
 		setIdCredit(idCredit);
@@ -83,34 +69,16 @@ public class Credit {
 		setCode(code);
 		setValeur(valeur);
 		setDaty(daty);
-	}
-	public Credit(String token, String code, String valeur, String daty) throws Exception{
-		Connection co= new ConnectionPstg().getConnection();
-		try {
-			int idCompte= Token.verificationToken(token,co);
-			setIdCompte(idCompte);
-			setCode(code);
-			setValeur(Integer.parseInt(valeur));
-			setDaty(daty);
-		}
-		catch(Exception ex) {
-			throw ex;
-		}
-		finally {
-			if(co != null) co.close();
-		}
-	}
-	
-	public static void insertMouvementCredit(Credit credit,Connection co) throws Exception {
+	}	
+	public static void insertMouvementCredit(int idCompte,String code, String valeur,Connection co) throws Exception {
 		PreparedStatement st = null;
 		try {
-			
-				String sql= "insert into credit(idCredit,idCompte,code,valeur,daty)VALUES(nextval('seqCredit'),?,?,?,?);";
+			int val= Integer.parseInt(valeur);
+				String sql= "insert into credit(idCredit,idCompte,code,valeur,daty)VALUES(nextval('seqCredit'),?,?,?,CURRENT_TIMESTAMP);";
 				st = co.prepareStatement(sql);
-				st.setInt(1,credit.getIdCompte());
-				st.setString(2,credit.getCode());
-				st.setInt(3,credit.getValeur());
-				st.setTimestamp(4,Timestamp.valueOf(credit.getDaty()));
+				st.setInt(1,idCompte);
+				st.setString(2,code);
+				st.setInt(3,val);
 				st.execute();
 				co.commit();
 
@@ -119,16 +87,6 @@ public class Credit {
 		} finally {
 			if(st != null) st.close();
 		}
-	}
-	public static void ajoutCredit(Credit credit,Connection co) throws Exception {
-		int val= credit.getValeur();
-		if(credit.getCode().length()!=14) throw new Exception("code invalide");
-		if(val!=1000 && val!=2000 && val!=5000 && val!=10000) throw new Exception("valeur invalide");
-		insertMouvementCredit(credit,co);
-	}
-	public static void debiterCredit(Credit credit,Connection co) throws Exception {
-		credit.setValeur(credit.getValeur()*(-1));
-		insertMouvementCredit(credit,co);
 	}
 	public static ArrayList<Credit> findAllCredit(String sql,Connection co) throws Exception{
 		PreparedStatement st = null;
@@ -176,12 +134,37 @@ public class Credit {
 		}
 		return crd.get(0);
     }
-	public static Response ajoutCreditWebService(Credit credit) throws Exception {
+	public static Response getSoldeWebService(String token) throws Exception {
+		Connection co= new ConnectionPstg().getConnection();
+		Response r= new Response();
+		r.code= "200";
+		r.data=null;
+		int idCompte= Token.verificationToken(token,co);
+		PreparedStatement st = null;
+		try {
+			r.data= Credit.getSoldeCredit(idCompte,co);
+			r.message= "votre solde";
+			
+		} catch (Exception e) {
+			r.code= "400";
+			r.message= e.getMessage();
+			e.printStackTrace();
+		} finally {
+			if(st != null) st.close();
+			if(co!=null) co.close();
+		}
+		return  r;
+	}
+	public static Response ajoutCreditWebService(String code,String valeur,String token) throws Exception {
 		Connection co= new ConnectionPstg().getConnection();
 		Response reponse= new Response();
 		try {
-			Credit.ajoutCredit(credit,co);
-			Credit crd= Credit.getSoldeCredit(credit.getIdCompte(),co);
+			int idCompte= Token.verificationToken(token,co);
+			int val= Integer.parseInt(valeur);
+			if(code.length()!=14) throw new Exception("code invalide");
+			if(val!=1000 && val!=2000 && val!=5000 && val!=10000) throw new Exception("valeur invalide");
+			insertMouvementCredit(idCompte,code,valeur,co);
+			Credit crd= Credit.getSoldeCredit(idCompte,co);
 			reponse.data= crd;
 			reponse.message= null;
 			reponse.code="200";
